@@ -1,9 +1,10 @@
-from turtle import forward
 import gymnasium as gym
 from collections import namedtuple
 import numpy as np
 from tensorboardX import SummaryWriter
-import pygame
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -48,7 +49,8 @@ def iterate_batches(env, net, batch_size):
     sm = nn.Softmax(dim = 1) #create a softmax layer, used to convert netwrok's output to probablity distribution
 
     while True:
-        obs_v = torch.FloatTensor([obs]) #convert a 4x1 into tensor of 1x4
+        # Convert observation to tensor efficiently: (1, obs_size)
+        obs_v = torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)
         act_probs_v = sm(net(obs_v)) #feed to softmax function for probability distribution
         act_probs = act_probs_v.data.numpy()[0] #returns tensors which track gradients, unpack them into a NumPy array
 
@@ -123,6 +125,11 @@ if __name__ == "__main__":
     objective = nn.CrossEntropyLoss() #loss function
     optimizer = optim.Adam(params=net.parameters(), lr=0.01)
     writer = SummaryWriter()
+    
+    # Lists to store metrics for plotting
+    iter_list = []
+    reward_mean_list = []
+    reward_bound_list = []
 
     #training loop
     #enumerate to get counter and value from iterable at the same time
@@ -141,8 +148,29 @@ if __name__ == "__main__":
         writer.add_scalar("loss", loss_v.item(), iter_no)
         writer.add_scalar("reward_bound", reward_b, iter_no)
         writer.add_scalar("reward_mean", reward_m, iter_no)
+        
+        # Store for plotting
+        iter_list.append(iter_no)
+        reward_mean_list.append(reward_m)
+        reward_bound_list.append(reward_b)
+
         if reward_m > 199: #Greater than 199 because in gym it's solved when mean reward greater than 199
             print("Solved!")
+        
+        if iter_no > 80:
+            print("Reached 80 iterations, stopping.")
             break
     writer.close()
     #env.close()
+
+    # Plotting results
+    plt.figure(figsize=(10, 5))
+    plt.plot(iter_list, reward_mean_list, label='Mean Reward')
+    plt.plot(iter_list, reward_bound_list, label='Reward Bound (Elite Threshold)')
+    plt.xlabel('Iteration')
+    plt.ylabel('Reward')
+    plt.title('CEM Training Progress on CartPole-v1')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('cartpole_rewards.png')
+    print("Plot saved to cartpole_rewards.png")

@@ -1,6 +1,4 @@
 import gymnasium as gym
-import gymnasium.spaces
-import gymnasium.wrappers
 # import gym.envs.toy_text.frozen_lake # Not needed with gym.make
 from collections import namedtuple
 import numpy as np
@@ -15,7 +13,7 @@ import random
 #Some pitfalls of cross entropy method are present and are addressed below
 
 HIDDEN_SIZE = 128
-BATCH_SIZE = 100 #Large batches of played episodes to get more successful episodes
+BATCH_SIZE = 2000 # Increased from 100 to ensure we find at least one goal in sparse reward setting
 PERCENTILE = 30
 GAMMA = 0.9 #Discount factor applied to reward for episode to depend on episode length
 
@@ -69,7 +67,8 @@ def iterate_batches(env, net, batch_size):
         obs = obs[0]
     sm = nn.Softmax(dim=1)
     while True:
-        obs_v = torch.FloatTensor([obs]) #convert a 4x1 into tensor of 1x4
+        # Optimized tensor conversion
+        obs_v = torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)
         act_probs_v = sm(net(obs_v)) #feed to softmax function for probability distribution
         act_probs = act_probs_v.data.numpy()[0] #returns tensors which track gradients, unpack them into a NumPy array
       
@@ -126,7 +125,11 @@ def filter_batch(batch, percentile):
     return elite_batch, train_obs, train_act, reward_bound
 
 if __name__ == "__main__":
+    # Fix all seeds for reproducibility
     random.seed(12345)
+    np.random.seed(12345)
+    torch.manual_seed(12345)
+    
     #Speeding it up
     # env = gym.envs.toy_text.frozen_lake.FrozenLakeEnv(is_slippery=False)
     # Use gym.make for compatibility and cleaner instantiation
@@ -148,6 +151,7 @@ if __name__ == "__main__":
         full_batch, obs, acts, reward_bound = filter_batch(full_batch+batch, PERCENTILE)
 
         if not full_batch:
+            print(f"{iter_no}: No elite episodes found, waiting for first success...")
             continue
         obs_v = torch.FloatTensor(obs)
         acts_v = torch.LongTensor(acts)
