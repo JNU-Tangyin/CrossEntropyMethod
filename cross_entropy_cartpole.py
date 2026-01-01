@@ -1,5 +1,5 @@
 from turtle import forward
-import gym
+import gymnasium as gym
 from collections import namedtuple
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -43,6 +43,8 @@ def iterate_batches(env, net, batch_size):
     episode_reward = 0.0 #total reward coutner
     episode_steps = [] #list of steps
     obs = env.reset() #reset to obtain first observation 
+    if isinstance(obs, tuple):
+        obs = obs[0]
     sm = nn.Softmax(dim = 1) #create a softmax layer, used to convert netwrok's output to probablity distribution
 
     while True:
@@ -54,7 +56,14 @@ def iterate_batches(env, net, batch_size):
         #use this distribution to obtain actual action at random
         #obtain next observation, reward, indcitaion episode is ending, and extra info
         action = np.random.choice(len(act_probs), p=act_probs)
-        next_obs, reward, is_done, extra_info = env.step(action)
+        
+        step_result = env.step(action)
+        if len(step_result) == 5:
+            next_obs, reward, terminated, truncated, extra_info = step_result
+            is_done = terminated or truncated
+        else:
+            next_obs, reward, is_done, extra_info = step_result
+            
         #env.render() for video
 
 
@@ -71,6 +80,8 @@ def iterate_batches(env, net, batch_size):
             episode_reward = 0.0
             episode_steps = []
             next_obs = env.reset()
+            if isinstance(next_obs, tuple):
+                next_obs = next_obs[0]
             #Reached desired count of episodes, return to caller using yield
             if(len(batch) == batch_size):
                 yield batch
@@ -96,7 +107,6 @@ def filter_batch(batch, percentile):
         #adds ALL elements of an iterable to end of list
         train_obs.extend(map(lambda step: step.observation, example.steps))
         train_act.extend(map(lambda step: step.action, example.steps))
-
     #Convert to tensors for training
     train_obs_v = torch.FloatTensor(train_obs)
     train_act_v = torch.LongTensor(train_act)
@@ -136,5 +146,3 @@ if __name__ == "__main__":
             break
     writer.close()
     #env.close()
-
-
