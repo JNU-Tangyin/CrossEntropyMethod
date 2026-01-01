@@ -36,7 +36,7 @@ sequenceDiagram
     Note over Main: Training Initialization
     Main->>Env: make and reset
     Main->>Net: Initialize Weights
-    
+  
     loop Every Iteration
         Note over Main: Data Collection Phase
         Main->>Env: reset
@@ -45,7 +45,7 @@ sequenceDiagram
         Net-->>Main: Action Probabilities
         Main->>Env: step
         Env-->>Main: Reward and Done
-        
+      
         Note over Main: Selection Phase
         Main->>Main: Filter Elite Episodes
 
@@ -54,7 +54,7 @@ sequenceDiagram
         Main->>Optim: zero_grad and backward
         Main->>Optim: step
         Optim->>Net: Update Weights
-        
+      
         Main->>Main: Log Metrics
     end
 ```
