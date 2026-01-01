@@ -1,0 +1,61 @@
+digraph CEM_Architecture {
+    rankdir=TB;
+    node [shape=box, style=filled, fillcolor=white];
+    
+    Start [shape=oval, label="Start"];
+    Init [label="Initialize Env, Neural Net, Optimizer"];
+    LoopStart [shape=diamond, label="Iteration Loop"];
+    
+    subgraph cluster_0 {
+        label = "Data Collection";
+        style=filled;
+        color=lightgrey;
+        node [style=filled,color=white];
+        GenBatch [label="Generate Batch of Episodes\n(Current Policy)"];
+        CalcRewards [label="Calculate Episode Rewards"];
+    }
+    
+    subgraph cluster_1 {
+        label = "Selection (CEM Core)";
+        style=filled;
+        color=lightblue;
+        node [style=filled,color=white];
+        CalcBound [label="Calculate Reward Bound\n(Percentile)"];
+        SelectElite [label="Select Elite Episodes\n(Reward > Bound)"];
+    }
+    
+    subgraph cluster_2 {
+        label = "Optimization";
+        style=filled;
+        color=lightgreen;
+        node [style=filled,color=white];
+        ExtractData [label="Extract Training Data\n(Obs, Act)"];
+        Forward [label="Forward Pass"];
+        CalcLoss [label="Calculate CrossEntropy Loss"];
+        Backprop [label="Update Weights"];
+    }
+    
+    Log [label="Log Metrics\n(TensorBoard / Console)"];
+    CheckSolved [shape=diamond, label="Solved?"];
+    End [shape=oval, label="End & Save Plots"];
+    
+    Start -> Init;
+    Init -> LoopStart;
+    
+    LoopStart -> GenBatch;
+    GenBatch -> CalcRewards;
+    
+    CalcRewards -> CalcBound;
+    CalcBound -> SelectElite;
+    
+    SelectElite -> ExtractData;
+    ExtractData -> Forward;
+    Forward -> CalcLoss;
+    CalcLoss -> Backprop;
+    
+    Backprop -> Log;
+    Log -> CheckSolved;
+    
+    CheckSolved -> LoopStart [label="No"];
+    CheckSolved -> End [label="Yes"];
+}

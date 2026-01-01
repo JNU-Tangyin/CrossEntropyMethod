@@ -19,3 +19,42 @@ If the agent reaches the destination cell then it an reward of 1.0 and the episo
 The world is slippery, so agent's actions are unexpected
 
 Refer to Issues->Images (Figures 5-7) for RL Results
+
+## Code Architecture (Cross-Entropy Method)
+
+![CEM Architecture](cem_architecture.png)
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant Env
+    participant Net
+    participant Optim
+
+    Note over Main: Training Initialization
+    Main->>Env: make and reset
+    Main->>Net: Initialize Weights
+    
+    loop Every Iteration
+        Note over Main: Data Collection Phase
+        Main->>Env: reset
+        Env-->>Main: Observation
+        Main->>Net: Forward
+        Net-->>Main: Action Probabilities
+        Main->>Env: step
+        Env-->>Main: Reward and Done
+        
+        Note over Main: Selection Phase
+        Main->>Main: Filter Elite Episodes
+
+        Note over Main: Optimization Phase
+        Main->>Net: Forward Elite Obs
+        Main->>Optim: zero_grad and backward
+        Main->>Optim: step
+        Optim->>Net: Update Weights
+        
+        Main->>Main: Log Metrics
+    end
+```
