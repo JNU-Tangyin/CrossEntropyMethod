@@ -42,17 +42,16 @@ def init_params(mu,sigma,n):
     """
     以mu和sigma的维度(=4)分量为均值和方差，采样n=40个点，组成n个4维向量
     """
-    l = mu.shape[0] # l=4
-    w_matrix = np.zeros((n,l))
-    for p in range(l):
-        w_matrix[:,p] = np.random.normal(loc = mu[p],scale = sigma[p]+1e-7,size = (n,))
-    return w_matrix
+    return np.random.normal(loc=mu, scale=sigma + 1e-7, size=(n, mu.shape[0]))
 
 def get_constant_noise(step):
     return np.clip(5-step/10., a_max=1,a_min=0.5)
 
 running_reward = 0
-n = 40;p = 8;n_iter = 100;render = False 
+n = 40
+p = 8
+n_iter = 100
+render = False 
 
 state, info = env.reset()
 i = 0
