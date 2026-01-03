@@ -2,9 +2,11 @@
 
 ![1767412371181](image/README/1767412371181.png)
 
-This repository implements the Cross-Entropy Method (CEM) for solving Reinforcement Learning environments, specifically **CartPole-v1**.
+![1767423920092](image/README/1767423920092.png)
 
-We provide two distinct implementations to demonstrate different policy representations:
+The linear(vector) version is much efficient than neural network(nn) version, while the min reward may have higher fluctation. The nn version has quite steady up going curve, indicating its stablity in learning.
+
+This repository implements the Cross-Entropy Method (CEM) for solving Reinforcement Learning environments, specifically **CartPole-v1**. We provide two distinct implementations to demonstrate different policy representations:
 
 1. **Vector/Linear Policy** (`cem_carpole_vector.py`)
 2. **Neural Network Policy** (`cem_cartpole_nn.py`)
@@ -111,7 +113,7 @@ sequenceDiagram
         Net-->>Main: Action Probabilities
         Main->>Env: step
         Env-->>Main: Reward and Done
-    
+  
         Note over Main: Selection Phase
         Main->>Main: Filter Elite Episodes
 
@@ -120,7 +122,7 @@ sequenceDiagram
         Main->>Optim: zero_grad and backward
         Main->>Optim: step
         Optim->>Net: Update Weights
-    
+  
         Main->>Main: Log Metrics
     end
 ```
