@@ -89,9 +89,6 @@ while i < n_iter:
     writer.add_scalar("Reward/Min", reward_sums.min(), i)
     writer.add_scalar("Training/SigmaMean", sigma.mean(), i)
     
-    print("#{},mean reward:{}, running reward mean:{} \n"
-            " reward range:{} to {},".format(
-                i, reward_sums.mean(),running_reward,reward_sums.min(),reward_sums.max(),
-                ))
+    print("#{},mean:{}, running mean:{} range:{} to {},".format(i, reward_sums.mean(),running_reward,reward_sums.min(),reward_sums.max(),))
     i += 1
 writer.close()
