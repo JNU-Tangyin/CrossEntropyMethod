@@ -66,22 +66,17 @@ while i < n_iter:
 
     #sort params/vectors based on total reward of an episode using that policy
     # 第三步：筛选精英 (Select Elites) - 优胜劣汰，只关心那 20% 表现最好的策略
-    rankings = np.argsort(reward_sums)
-    #pick p vectors with highest reward
-    top_vectors = wvector_array[rankings,:]
-    top_vectors = top_vectors[-p:,:]
-    # print(f"top vectors shape: {top_vectors.shape}")
+    elite_idxs = np.argsort(reward_sums)[-p:]
+    top_vectors = wvector_array[elite_idxs]
     #fit new gaussian from which to sample policy
     # 第四步：更新分布 (Update Distribution) - 进化
-    for q in range(top_vectors.shape[1]):
-        mu[q] = top_vectors[:,q].mean() # 均值移动：下一次采样的中心，移动到精英的中心（向高分区域靠近）
-        sigma[q] = top_vectors[:,q].std() + get_constant_noise(i) # 方差收缩：精英们聚在一起，std变小；注入噪声防止过早收敛
+    mu = top_vectors.mean(axis=0)
+    sigma = top_vectors.std(axis=0) + get_constant_noise(i)
 
     running_reward = 0.99*running_reward + 0.01*reward_sums.mean()
     
     # Calculate Reward Bound (min reward of elite samples)
-    # rankings are indices sorted by reward, so rankings[-p] is the index of the p-th best (threshold)
-    reward_bound = reward_sums[rankings[-p]]
+    reward_bound = reward_sums[elite_idxs].min()
 
     # TensorBoard logging
     writer.add_scalar("Reward/Mean", reward_sums.mean(), i)
