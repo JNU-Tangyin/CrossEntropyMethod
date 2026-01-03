@@ -99,6 +99,8 @@ def filter_batch(batch, percentile):
     #From list of rewards and desired percentile, calculate the percentile's value
     reward_bound = np.percentile(rewards, percentile) 
     reward_mean = float(np.mean(rewards)) #used for monitoring
+    reward_max = float(np.max(rewards))
+    reward_min = float(np.min(rewards))
 
     #Only train elite episodes!
     train_obs = []
@@ -114,7 +116,7 @@ def filter_batch(batch, percentile):
     train_obs_v = torch.FloatTensor(train_obs)
     train_act_v = torch.LongTensor(train_act)
     #Last two values only uesd to check on tensorboard how well our agent is doing
-    return train_obs_v, train_act_v, reward_bound, reward_mean
+    return train_obs_v, train_act_v, reward_bound, reward_mean, reward_max, reward_min
 
 if __name__ == "__main__":
     env = gym.make("CartPole-v1")
@@ -131,11 +133,13 @@ if __name__ == "__main__":
     iter_list = []
     reward_mean_list = []
     reward_bound_list = []
+    
+    running_reward = 0.0
 
     #training loop
     #enumerate to get counter and value from iterable at the same time
     for iter_no, batch in enumerate(iterate_batches(env, net, BATCH_SIZE)):
-        obs_v, acts_v, reward_b, reward_m = filter_batch(batch, PERCENTILE)
+        obs_v, acts_v, reward_b, reward_m, reward_max, reward_min = filter_batch(batch, PERCENTILE)
         #Classic training algorithm
         optimizer.zero_grad()
         action_scores_v = net(obs_v)
@@ -143,12 +147,20 @@ if __name__ == "__main__":
         loss_v.backward()
         optimizer.step()
 
+        if iter_no == 0:
+            running_reward = reward_m
+        else:
+            running_reward = 0.99 * running_reward + 0.01 * reward_m
+
         #Keeping track of progress
-        print("%d: loss=%.3f, reward_mean=%.1f, reward_bound=%.1f" % (
-            iter_no, loss_v.item(), reward_m, reward_b))
+        print("%d: loss=%.3f, reward_mean=%.1f, reward_bound=%.1f, running_reward=%.1f" % (
+            iter_no, loss_v.item(), reward_m, reward_b, running_reward))
         writer.add_scalar("Loss/Value", loss_v.item(), iter_no)
         writer.add_scalar("Reward/Bound", reward_b, iter_no)
         writer.add_scalar("Reward/Mean", reward_m, iter_no)
+        writer.add_scalar("Reward/Running", running_reward, iter_no)
+        writer.add_scalar("Reward/Max", reward_max, iter_no)
+        writer.add_scalar("Reward/Min", reward_min, iter_no)
         
         # Store for plotting
         iter_list.append(iter_no)
@@ -164,14 +176,14 @@ if __name__ == "__main__":
     writer.close()
     #env.close()
 
-    # Plotting results
-    plt.figure(figsize=(10, 5))
-    plt.plot(iter_list, reward_mean_list, label='Mean Reward')
-    plt.plot(iter_list, reward_bound_list, label='Reward Bound (Elite Threshold)')
-    plt.xlabel('Iteration')
-    plt.ylabel('Reward')
-    plt.title('CEM with NN Training Progress on CartPole-v1')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig('cartpole_rewards.png')
-    print("Plot saved to cartpole_rewards.png")
+    # # Plotting results
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(iter_list, reward_mean_list, label='Mean Reward')
+    # plt.plot(iter_list, reward_bound_list, label='Reward Bound (Elite Threshold)')
+    # plt.xlabel('Iteration')
+    # plt.ylabel('Reward')
+    # plt.title('CEM with NN Training Progress on CartPole-v1')
+    # plt.legend()
+    # plt.grid(True)
+    # plt.savefig('cartpole_rewards.png')
+    # print("Plot saved to cartpole_rewards.png")
