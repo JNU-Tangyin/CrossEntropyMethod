@@ -55,8 +55,7 @@ n_iter = 100
 render = False 
 
 state, info = env.reset()
-i = 0
-while i < n_iter:
+for i in range(n_iter):
     #initialize an array of parameter vectors
     # 第一步：采样 (Sample) - 从分布里猜一群参数
     wvector_array = init_params(mu,sigma,n)
@@ -85,7 +84,5 @@ while i < n_iter:
     writer.add_scalar("Reward/Max", reward_sums.max(), i)
     writer.add_scalar("Reward/Min", reward_sums.min(), i)
     writer.add_scalar("Training/SigmaMean", sigma.mean(), i)
-    
     print(f"# {i}, mean: {reward_sums.mean():.3f}, running mean: {running_reward:.3f}, range: {reward_sums.min():.3f} to {reward_sums.max():.3f}")
-    i += 1
 writer.close()
