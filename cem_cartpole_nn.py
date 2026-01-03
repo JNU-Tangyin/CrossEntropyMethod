@@ -155,7 +155,7 @@ if __name__ == "__main__":
         #Keeping track of progress
         print("%d: loss=%.3f, reward_mean=%.1f, reward_bound=%.1f, running_reward=%.1f" % (
             iter_no, loss_v.item(), reward_m, reward_b, running_reward))
-        writer.add_scalar("Loss/Value", loss_v.item(), iter_no)
+        writer.add_scalar("Training/Loss", loss_v.item(), iter_no)
         writer.add_scalar("Reward/Bound", reward_b, iter_no)
         writer.add_scalar("Reward/Mean", reward_m, iter_no)
         writer.add_scalar("Reward/Running", running_reward, iter_no)
