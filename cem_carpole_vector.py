@@ -1,4 +1,6 @@
 # https://blog.csdn.net/hhy_csdn/article/details/107984458
+# https://github.com/andrewliao11/cem
+# use simply vector to represent policy
 import gymnasium as gym
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -75,12 +77,17 @@ while i < n_iter:
 
     running_reward = 0.99*running_reward + 0.01*reward_sums.mean()
     
+    # Calculate Reward Bound (min reward of elite samples)
+    # rankings are indices sorted by reward, so rankings[-p] is the index of the p-th best (threshold)
+    reward_bound = reward_sums[rankings[-p]]
+
     # TensorBoard logging
-    writer.add_scalar("reward/mean", reward_sums.mean(), i)
-    writer.add_scalar("reward/running", running_reward, i)
-    writer.add_scalar("reward/max", reward_sums.max(), i)
-    writer.add_scalar("reward/min", reward_sums.min(), i)
-    writer.add_scalar("params/sigma_mean", sigma.mean(), i)
+    writer.add_scalar("Reward/Mean", reward_sums.mean(), i)
+    writer.add_scalar("Reward/Running", running_reward, i)
+    writer.add_scalar("Reward/Bound", reward_bound, i)
+    writer.add_scalar("Reward/Max", reward_sums.max(), i)
+    writer.add_scalar("Reward/Min", reward_sums.min(), i)
+    writer.add_scalar("Params/SigmaMean", sigma.mean(), i)
     
     print("iteration:{},mean reward:{}, running reward mean:{} \n"
             " reward range:{} to {},".format(
