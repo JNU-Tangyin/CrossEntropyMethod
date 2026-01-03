@@ -1,24 +1,76 @@
-# ReinforcementLearningMethods (RL) Methods
+# Cross-Entropy Method (CEM) for Reinforcement Learning
 
-_CartPole Environement Problem_
+This repository implements the Cross-Entropy Method (CEM) for solving Reinforcement Learning environments, specifically **CartPole-v1**.
 
-Proposed Problem: How to balance a stick without it falling by moving to the left or right. Refer to Figure in Issues->Images
-Cross Entropy Method applied on this problem, results of the RL model can be found underneath issues->images
+We provide two distinct implementations to demonstrate different policy representations:
+1.  **Vector/Linear Policy** (`cem_carpole_vector.py`)
+2.  **Neural Network Policy** (`cem_cartpole_nn.py`)
 
-Refer to Issues->Images (Figures 1-3) for RL Results
+## Implementations
 
-_FrozenLake Environment Problem_
+### 1. Vector (Linear) Policy
+*   **File**: `cem_carpole_vector.py`
+*   **Description**: Uses a simple linear weight matrix (vector) to map observations directly to actions.
+*   **Characteristics**:
+    *   Extremely fast convergence (often solves CartPole in <10 iterations).
+    *   Low computational overhead.
+    *   Limited to simple problems where a linear decision boundary suffices.
 
-Outline of problem:
-Agent lives in a grid of size 4 x 4 and can move in four directions: up, down, left, and right
+### 2. Neural Network Policy
+*   **File**: `cem_cartpole_nn.py`
+*   **Description**: Uses a PyTorch-based Deep Neural Network (MLP) to approximate the policy.
+*   **Characteristics**:
+    *   Can model complex, non-linear relationships.
+    *   Slower convergence compared to the linear policy on simple tasks.
+    *   More generalizable to complex environments.
 
-Proposed Problem:
-Agent always starts at top-left position and its goal is to reach the bottom-right cell of the grid. (See Figure 4 for details)
-There are holes in the fixed cells of the grid and if agent falls into these holes, the episode ends
-If the agent reaches the destination cell then it an reward of 1.0 and the episode ends.
-The world is slippery, so agent's actions are unexpected
+## Usage
 
-Refer to Issues->Images (Figures 5-7) for RL Results
+### Prerequisites
+Install the required dependencies:
+```bash
+pip install gymnasium numpy torch tensorboardX matplotlib
+```
+
+### Running the Experiments
+Run both scripts to generate training logs:
+
+```bash
+# Run Vector implementation (Linear Policy)
+python cem_carpole_vector.py
+
+# Run Neural Network implementation
+python cem_cartpole_nn.py
+```
+
+### Visualization & Comparison (TensorBoard)
+Both scripts log unified metrics to TensorBoard for easy side-by-side comparison.
+
+To view results:
+```bash
+tensorboard --logdir runs
+```
+Open your browser at `http://localhost:6006`.
+
+**Key Metrics to Compare:**
+*   **`Reward/Mean`**: Average reward of the batch.
+*   **`Reward/Bound`**: The reward threshold (70th percentile) used to select "elite" episodes.
+*   **`Reward/Running`**: Smoothed running average reward (Best for tracking overall progress).
+*   **`Reward/Max`**: Maximum reward achieved in the current batch.
+
+---
+
+## Environments
+
+### CartPole-v1
+*   **Goal**: Balance a pole on a cart by moving left or right.
+*   **Success Criterion**: Average reward > 195 (or 475 in v1) over 100 trials. Our scripts run for 100 iterations to show stability.
+
+### FrozenLake (Archive)
+*   **File**: `frozen_lake.py`
+*   **Goal**: Navigate a slippery grid to reach the goal without falling into holes.
+
+---
 
 ## Code Architecture (Cross-Entropy Method)
 
