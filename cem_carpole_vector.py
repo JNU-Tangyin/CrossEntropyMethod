@@ -26,14 +26,14 @@ def noisy_evaluation(env,W,render = False,):
     state, _ = env.reset()
     t = 0
     while True:
-      t += 1
-      action = int(np.dot(W,state)>0) # use parameters/state to choose action
-      state, reward, terminated, truncated, info = env.step(action)
-      done = terminated or truncated
-      reward_sum += reward
-      if render and t%3 == 0: env.render()
-      if done or t > 2000: # 
-            #print("finished episode, got reward:{}".format(reward_sum)) 
+        t += 1
+        action = int(np.dot(W,state)>0) # W*state作为state
+        state, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
+        reward_sum += reward
+        if render and t%5 == 0: 
+            env.render()
+        if done or t > 2000: # 
             break
 
     return reward_sum
@@ -51,17 +51,14 @@ running_reward = 0
 n = 40
 p = 8
 n_iter = 100
-render = False 
+render = True 
 
 state, info = env.reset()
 i = 0
 while i < n_iter:
     #initialize an array of parameter vectors
     wvector_array = init_params(mu,sigma,n)
-    reward_sums = np.zeros((n))
-    for k in range(n):
-        #sample rewards based on policy parameters in row k of wvector_array
-        reward_sums[k] = noisy_evaluation(env,wvector_array[k,:],render)
+    reward_sums = np.array([noisy_evaluation(env, w, render) for w in wvector_array])
 
     #sort params/vectors based on total reward of an episode using that policy
     rankings = np.argsort(reward_sums)
