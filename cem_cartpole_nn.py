@@ -147,6 +147,10 @@ if __name__ == "__main__":
         loss_v.backward()
         optimizer.step()
 
+        # Calculate Entropy for logging (Proxy for exploration/Sigma)
+        probs_v = torch.softmax(action_scores_v, dim=1)
+        entropy_v = -(probs_v * probs_v.log()).sum(dim=1).mean()
+
         if iter_no == 0:
             running_reward = reward_m
         else:
@@ -156,6 +160,7 @@ if __name__ == "__main__":
         print("%d: loss=%.3f, reward_mean=%.1f, reward_bound=%.1f, running_reward=%.1f" % (
             iter_no, loss_v.item(), reward_m, reward_b, running_reward))
         writer.add_scalar("Training/Loss", loss_v.item(), iter_no)
+        writer.add_scalar("Training/PolicyEntropy", entropy_v.item(), iter_no)
         writer.add_scalar("Reward/Bound", reward_b, iter_no)
         writer.add_scalar("Reward/Mean", reward_m, iter_no)
         writer.add_scalar("Reward/Running", running_reward, iter_no)
