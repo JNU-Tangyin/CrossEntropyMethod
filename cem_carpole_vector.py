@@ -52,7 +52,7 @@ def get_constant_noise(step):
     return np.clip(5-step/10., a_max=1,a_min=0.5)
 
 running_reward = 0
-n = 40;p = 8;n_iter = 40;render = False 
+n = 40;p = 8;n_iter = 100;render = False 
 
 state, info = env.reset()
 i = 0
@@ -89,7 +89,7 @@ while i < n_iter:
     writer.add_scalar("Reward/Min", reward_sums.min(), i)
     writer.add_scalar("Params/SigmaMean", sigma.mean(), i)
     
-    print("iteration:{},mean reward:{}, running reward mean:{} \n"
+    print("#{},mean reward:{}, running reward mean:{} \n"
             " reward range:{} to {},".format(
                 i, reward_sums.mean(),running_reward,reward_sums.min(),reward_sums.max(),
                 ))

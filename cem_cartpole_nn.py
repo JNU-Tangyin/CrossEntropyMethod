@@ -170,8 +170,8 @@ if __name__ == "__main__":
         if reward_m > 199: #Greater than 199 because in gym it's solved when mean reward greater than 199
             print("Solved!")
         
-        if iter_no > 80:
-            print("Reached 80 iterations, stopping.")
+        if iter_no > 100:
+            print("Reached 100 iterations, stopping.")
             break
     writer.close()
     #env.close()
