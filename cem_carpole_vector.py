@@ -62,10 +62,7 @@ while i < n_iter:
     wvector_array = init_params(mu,sigma,n)
     
     # 第二步：评估 (Evaluate) - 去环境里跑分
-    reward_sums = np.zeros((n))
-    for k in range(n):
-        #sample rewards based on policy parameters in row k of wvector_array
-        reward_sums[k] = noisy_evaluation(env,wvector_array[k,:],render)
+    reward_sums = np.array([noisy_evaluation(env, w, render) for w in wvector_array])
 
     #sort params/vectors based on total reward of an episode using that policy
     # 第三步：筛选精英 (Select Elites) - 优胜劣汰，只关心那 20% 表现最好的策略
