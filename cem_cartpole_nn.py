@@ -130,9 +130,9 @@ if __name__ == "__main__":
     writer = SummaryWriter(comment="-cem-nn")
     
     # Lists to store metrics for plotting
-    iter_list = []
-    reward_mean_list = []
-    reward_bound_list = []
+    # iter_list = []
+    # reward_mean_list = []
+    # reward_bound_list = []
     
     running_reward = 0.0
 
@@ -151,10 +151,16 @@ if __name__ == "__main__":
         probs_v = torch.softmax(action_scores_v, dim=1)
         entropy_v = -(probs_v * probs_v.log()).sum(dim=1).mean()
 
-        if iter_no == 0:
-            running_reward = reward_m
-        else:
-            running_reward = 0.99 * running_reward + 0.01 * reward_m
+        running_reward = reward_m if iter_no == 0 \
+            else 0.99 * running_reward + 0.01 * reward_m 
+
+        if reward_m > 495: # CartPole-v1 is solved at 475, max is 500. We set 495 to be close to max.
+            print(f"Solved! Iteration {iter_no}, mean reward: {reward_m}")
+            break
+        
+        if iter_no > 100:
+            print(f"Reached 100 iterations, stopping. Final mean reward: {reward_m}")
+            break
 
         #Keeping track of progress
         print("%d: loss=%.3f, reward_mean=%.1f, reward_bound=%.1f, running_reward=%.1f" % (
@@ -165,19 +171,12 @@ if __name__ == "__main__":
         writer.add_scalar("Reward/Mean", reward_m, iter_no)
         writer.add_scalar("Reward/Running", running_reward, iter_no)
         writer.add_scalar("Reward/Max", reward_max, iter_no)
-        writer.add_scalar("Reward/Min", reward_min, iter_no)
-        
+        writer.add_scalar("Reward/Min", reward_min, iter_no) 
         # Store for plotting
-        iter_list.append(iter_no)
-        reward_mean_list.append(reward_m)
-        reward_bound_list.append(reward_b)
-
-        if reward_m > 199: #Greater than 199 because in gym it's solved when mean reward greater than 199
-            print("Solved!")
-        
-        if iter_no > 100:
-            print("Reached 100 iterations, stopping.")
-            break
+        # iter_list.append(iter_no)
+        # reward_mean_list.append(reward_m)
+        # reward_bound_list.append(reward_b)
+    
     writer.close()
     #env.close()
 
