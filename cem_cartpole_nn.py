@@ -133,7 +133,7 @@ def filter_batch(batch, percentile):
     return train_obs_v, train_act_v, reward_bound, reward_mean, reward_max, reward_min
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1")
+    env = gym.make("CartPole-v1", max_episode_steps=500)
     
     obs_size = env.observation_space.shape[0]
     n_actions = env.action_space.n
@@ -173,8 +173,8 @@ if __name__ == "__main__":
             else 0.99 * running_reward + 0.01 * reward_m 
 
         # 4. 停止条件
-        if iter_no > 100:
-            print(f"Reached 100 iterations, stopping. Final mean reward: {reward_m}")
+        if iter_no >= 64:
+            print(f"Reached 64 iterations, stopping. Final mean reward: {reward_m}")
             break
 
         # 5. 日志记录

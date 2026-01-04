@@ -5,7 +5,7 @@ import gymnasium as gym
 import numpy as np
 from tensorboardX import SummaryWriter
 
-env = gym.make('CartPole-v1')
+env = gym.make('CartPole-v1', max_episode_steps=500)
 # env = env.unwrapped
 # env.render()
 
@@ -47,7 +47,7 @@ def get_constant_noise(step):
 running_reward = 0
 n = 40
 p = 8
-n_iter = 100
+n_iter = 64
 render = False 
 
 state, info = env.reset()

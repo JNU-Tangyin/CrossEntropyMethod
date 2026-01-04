@@ -29,7 +29,7 @@ N_COMPONENTS = 100      # 每个 RBF 采样器的特征数量
 
 # 对比实验设置
 BATCH_SIZE = 16
-MAX_EPISODES = 100
+MAX_EPISODES = 1024
 
 class RBFFeaturizer:
     """
@@ -121,8 +121,8 @@ class LinearQLearner:
         self.weights[action] += LEARNING_RATE * error * features
 
 if __name__ == "__main__":
-    # 同样设置 max_episode_steps=100
-    env = gym.make("CartPole-v1", max_episode_steps=100)
+    # 显式指定 max_episode_steps=500
+    env = gym.make("CartPole-v1", max_episode_steps=500)
     writer = SummaryWriter(comment="-linear-rbf")
     
     agent = LinearQLearner(env)
