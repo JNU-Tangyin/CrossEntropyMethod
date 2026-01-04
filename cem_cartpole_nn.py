@@ -103,18 +103,15 @@ def filter_batch(batch, percentile):
     reward_min = float(np.min(rewards))
 
     #Only train elite episodes!
-    train_obs = []
-    train_act = []
-    #For every episode in the batch, if lower than our reward bound we throw it out
-    for example in batch:
-        if example.reward < reward_bound:
-            continue
-        #adds ALL elements of an iterable to end of list
-        train_obs.extend(map(lambda step: step.observation, example.steps))
-        train_act.extend(map(lambda step: step.action, example.steps))
-    #Convert to tensors for training
-    train_obs_v = torch.FloatTensor(train_obs)
-    train_act_v = torch.LongTensor(train_act)
+    elite_batch = [e for e in batch if e.reward >= reward_bound]
+    
+    # Flatten steps from all elite episodes
+    train_obs = [step.observation for e in elite_batch for step in e.steps]
+    train_act = [step.action for e in elite_batch for step in e.steps]
+    
+    #Convert to tensors efficiently (via numpy array to avoid warning/copy)
+    train_obs_v = torch.as_tensor(np.array(train_obs), dtype=torch.float32)
+    train_act_v = torch.as_tensor(np.array(train_act), dtype=torch.long)
     #Last two values only uesd to check on tensorboard how well our agent is doing
     return train_obs_v, train_act_v, reward_bound, reward_mean, reward_max, reward_min
 
@@ -154,10 +151,6 @@ if __name__ == "__main__":
         running_reward = reward_m if iter_no == 0 \
             else 0.99 * running_reward + 0.01 * reward_m 
 
-        if reward_m > 495: # CartPole-v1 is solved at 475, max is 500. We set 495 to be close to max.
-            print(f"Solved! Iteration {iter_no}, mean reward: {reward_m}")
-            break
-        
         if iter_no > 100:
             print(f"Reached 100 iterations, stopping. Final mean reward: {reward_m}")
             break
