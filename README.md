@@ -31,6 +31,33 @@ This repository implements the Cross-Entropy Method (CEM) for solving Reinforcem
   * Slower convergence compared to the linear policy on simple tasks.
   * More generalizable to complex environments.
 
+## Value-Based Methods (Q-Learning & SARSA)
+
+We also provide classic Value-Based implementations for comparison. These methods estimate the value of actions (Q-values) rather than directly optimizing the policy.
+
+### 3. Tabular Q-learning
+* **File**: `Qlearning_cartpole.py`
+* **Description**: Classic Q-learning with state **discretization** (binning).
+* **Characteristics**:
+  * **Off-Policy**: Learns the optimal value function independently of the agent's actions.
+  * Requires manually discretizing the continuous state space into grids (bins).
+  * Slower convergence due to the large number of states to explore.
+
+### 4. Tabular SARSA
+* **File**: `SARSA_cartpole.py`
+* **Description**: On-policy SARSA algorithm with state discretization.
+* **Characteristics**:
+  * **On-Policy**: Learns the value of the policy being followed (including exploration noise).
+  * Generally more stable but conservative than Q-learning.
+
+### 5. Linear Q-learning with RBF (Radial Basis Functions)
+* **File**: `RBF_Qlearning_cartpole.py`
+* **Description**: Q-learning using **Linear Function Approximation** with RBF features.
+* **Characteristics**:
+  * **No Discretization**: Handles continuous state space directly by projecting states into a high-dimensional feature space.
+  * **Fast Convergence**: Solves CartPole very quickly, demonstrating the power of feature engineering.
+  * *Note*: Also includes `linear_raw_cartpole.py` as a negative example to show why simple linear models fail without RBF projection.
+
 ## Usage
 
 ### Prerequisites
@@ -51,6 +78,11 @@ python cem_carpole_vector.py
 
 # Run Neural Network implementation
 python cem_cartpole_nn.py
+
+# Run Value-Based methods
+python Qlearning_cartpole.py
+python SARSA_cartpole.py
+python RBF_Qlearning_cartpole.py
 ```
 
 ### Visualization & Comparison (TensorBoard)
