@@ -29,7 +29,7 @@ N_COMPONENTS = 100      # 每个 RBF 采样器的特征数量
 
 # 对比实验设置
 BATCH_SIZE = 16
-MAX_EPISODES = 3000
+MAX_EPISODES = 100
 
 class RBFFeaturizer:
     """
@@ -121,8 +121,8 @@ class LinearQLearner:
         self.weights[action] += LEARNING_RATE * error * features
 
 if __name__ == "__main__":
-    # 同样设置 max_episode_steps=500
-    env = gym.make("CartPole-v1", max_episode_steps=500)
+    # 同样设置 max_episode_steps=100
+    env = gym.make("CartPole-v1", max_episode_steps=100)
     writer = SummaryWriter(comment="-linear-rbf")
     
     agent = LinearQLearner(env)
@@ -159,13 +159,9 @@ if __name__ == "__main__":
             reward_max = np.max(batch_rewards)
             reward_min = np.min(batch_rewards)
             
-            if iter_no == 0:
-                running_reward = reward_mean
-            else:
-                running_reward = 0.99 * running_reward + 0.01 * reward_mean
+            running_reward = reward_mean if iter_no == 0 else 0.99 * running_reward + 0.01 * reward_mean
             
-            print("%d: reward_mean=%.1f, reward_max=%.1f, running_reward=%.1f, epsilon=%.2f" % (
-                iter_no, reward_mean, reward_max, running_reward, epsilon), flush=True)
+            print(f"{iter_no}: reward_mean={reward_mean:.1f}, reward_max={reward_max:.1f}, running_reward={running_reward:.1f}, epsilon={epsilon:.2f}", flush=True)
             
             writer.add_scalar("Reward/Mean", reward_mean, iter_no)
             writer.add_scalar("Reward/Max", reward_max, iter_no)

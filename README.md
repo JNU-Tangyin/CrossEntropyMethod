@@ -1,15 +1,18 @@
 # Cross-Entropy Method (CEM) for Reinforcement Learning
 
+This repository implements the Cross-Entropy Method (CEM) for solving Reinforcement Learning environments, specifically **CartPole-v1**. We provide two distinct implementations to demonstrate different policy representations:
+
 ![1767412371181](image/README/1767412371181.png)
 
 ![1767423920092](image/README/1767423920092.png)
 
-The linear(vector) version is much efficient than neural network(nn) version, while the min reward may have higher fluctation. The nn version has quite steady up going curve, indicating its stablity in learning.
-
-This repository implements the Cross-Entropy Method (CEM) for solving Reinforcement Learning environments, specifically **CartPole-v1**. We provide two distinct implementations to demonstrate different policy representations:
+The linear(vector) version is much efficient than neural network(nn) version, while the min reward may have higher fluctation. The nn version has quite steady up going curve, indicating its stablity in learning. In the mean time, RBF-QLearning also performs well while slow.
 
 1. **Vector/Linear Policy** (`cem_carpole_vector.py`)
 2. **Neural Network Policy** (`cem_cartpole_nn.py`)
+3. **RBF QLearning** (`RBF_Qlearning_cartpole.py`)
+4. **Tabular QLearning** (`Qlearning_cartpole.py`)
+5. **Tabular SARSA** (`SARSA_cartpole.py`)
 
 ## Implementations
 
@@ -31,11 +34,8 @@ This repository implements the Cross-Entropy Method (CEM) for solving Reinforcem
   * Slower convergence compared to the linear policy on simple tasks.
   * More generalizable to complex environments.
 
-## Value-Based Methods (Q-Learning & SARSA)
-
-We also provide classic Value-Based implementations for comparison. These methods estimate the value of actions (Q-values) rather than directly optimizing the policy.
-
 ### 3. Tabular Q-learning
+
 * **File**: `Qlearning_cartpole.py`
 * **Description**: Classic Q-learning with state **discretization** (binning).
 * **Characteristics**:
@@ -44,6 +44,7 @@ We also provide classic Value-Based implementations for comparison. These method
   * Slower convergence due to the large number of states to explore.
 
 ### 4. Tabular SARSA
+
 * **File**: `SARSA_cartpole.py`
 * **Description**: On-policy SARSA algorithm with state discretization.
 * **Characteristics**:
@@ -51,6 +52,7 @@ We also provide classic Value-Based implementations for comparison. These method
   * Generally more stable but conservative than Q-learning.
 
 ### 5. Linear Q-learning with RBF (Radial Basis Functions)
+
 * **File**: `RBF_Qlearning_cartpole.py`
 * **Description**: Q-learning using **Linear Function Approximation** with RBF features.
 * **Characteristics**:
