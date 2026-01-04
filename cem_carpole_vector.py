@@ -25,21 +25,19 @@ def noisy_evaluation(env,W,render = False,):
     reward_sum = 0
     state, _ = env.reset()
     for t in range(1, 2001): # 设置最大步数限制，避免死循环
-        action = int(np.dot(W,state)>0) # 核心决策逻辑：线性策略 (Linear Policy)
-        # 相当于在 4维状态空间中切了一刀（超平面），左边推一把，右边推一把。
-        state, reward, terminated, truncated, info = env.step(action)
-        done = terminated or truncated
+        action = int(np.dot(W,state)>0) # 策略：极简版 a=NN(s)
+        state, reward, terminated, truncated, _ = env.step(action)
         reward_sum += reward
         if render and t%5 == 0: 
             env.render()
-        if done: 
+        if terminated or truncated: 
             break
     return reward_sum
     
 def init_params(mu,sigma,n):
     """
     种群生成 (Population Generation):
-    利用 NumPy 广播机制，上帝掷骰子，一次性从 N(mu, sigma) 中采样 n 个不同的“平行宇宙”权重。
+    利用 NumPy 广播机制，一次性从 N(mu, sigma) 中采样 n 个不同的“平行宇宙”权重。
     """
     return np.random.normal(loc=mu, scale=sigma + 1e-7, size=(n, mu.shape[0]))
 
@@ -70,9 +68,8 @@ for i in range(n_iter):
     mu = top_vectors.mean(axis=0)
     sigma = top_vectors.std(axis=0) + get_constant_noise(i)
 
+    # 计算当前迭代的平均奖励和sigma均值
     running_reward = 0.99*running_reward + 0.01*reward_sums.mean()
-    
-    # Calculate Reward Bound (min reward of elite samples)
     reward_bound = reward_sums[elite_idxs].min()
 
     # TensorBoard logging
@@ -82,5 +79,5 @@ for i in range(n_iter):
     writer.add_scalar("Reward/Max", reward_sums.max(), i)
     writer.add_scalar("Reward/Min", reward_sums.min(), i)
     writer.add_scalar("Training/SigmaMean", sigma.mean(), i)
-    print(f"# {i}, mean: {reward_sums.mean():.3f}, running mean: {running_reward:.3f}, range: {reward_sums.min():.3f} to {reward_sums.max():.3f}")
+    print(f"# {i}, mean: {reward_sums.mean():.3f}, running mean: {running_reward:.3f}, bound: {reward_bound:.3f}, range: {reward_sums.min():.3f} to {reward_sums.max():.3f}")
 writer.close()
