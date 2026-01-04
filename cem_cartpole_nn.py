@@ -41,56 +41,33 @@ EpisodeStep = namedtuple('EpisodeStep', field_names=['observation', 'action'])
 #count of episodes it should generate each iteration
 #Step 1, N number of episodes
 def iterate_batches(env, net, batch_size):
-    batch = [] #used to accumulate batch (list of episode instances)
-    episode_reward = 0.0 #total reward coutner
-    episode_steps = [] #list of steps
-    obs = env.reset() #reset to obtain first observation 
-    if isinstance(obs, tuple):
-        obs = obs[0]
-    sm = nn.Softmax(dim = 1) #create a softmax layer, used to convert netwrok's output to probablity distribution
-
+    sm = nn.Softmax(dim=1)
+    
     while True:
-        # Convert observation to tensor efficiently: (1, obs_size)
-        obs_v = torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)
-        act_probs_v = sm(net(obs_v)) #feed to softmax function for probability distribution
-        act_probs = act_probs_v.data.numpy()[0] #returns tensors which track gradients, unpack them into a NumPy array
-
-        #we have probability of actions
-        #use this distribution to obtain actual action at random
-        #obtain next observation, reward, indcitaion episode is ending, and extra info
-        action = np.random.choice(len(act_probs), p=act_probs)
-        
-        step_result = env.step(action)
-        if len(step_result) == 5:
-            next_obs, reward, terminated, truncated, extra_info = step_result
-            is_done = terminated or truncated
-        else:
-            next_obs, reward, is_done, extra_info = step_result
-            
-        #env.render() for video
-
-
-        #Step number 2, calculate total award for every espidoe
-        #Accumulate total award
-        #List of episode steps extended with an observation, action pair
-        #Careful! we save observation that was used to choose action, not next_obs
-        episode_reward += reward
-        episode_steps.append(EpisodeStep(observation=obs, action=action))
-
-        #Reset everything after appending finalized episdoe to batch with total award and steps
-        if is_done:
-            batch.append(Episode(reward=episode_reward, steps=episode_steps))
+        batch = []
+        for _ in range(batch_size):
             episode_reward = 0.0
             episode_steps = []
-            next_obs = env.reset()
-            if isinstance(next_obs, tuple):
-                next_obs = next_obs[0]
-            #Reached desired count of episodes, return to caller using yield
-            if(len(batch) == batch_size):
-                yield batch
-                batch = [] #reset for next batch
-        #assign an observation obtained from environment to curr observation
-        obs = next_obs
+            obs, _ = env.reset()
+            
+            while True:
+                obs_v = torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)
+                act_probs_v = sm(net(obs_v))
+                act_probs = act_probs_v.data.numpy()[0]
+                
+                action = np.random.choice(len(act_probs), p=act_probs)
+                next_obs, reward, terminated, truncated, _ = env.step(action)
+                
+                episode_reward += reward
+                episode_steps.append(EpisodeStep(observation=obs, action=action))
+                
+                if terminated or truncated:
+                    batch.append(Episode(reward=episode_reward, steps=episode_steps))
+                    break
+                
+                obs = next_obs
+        
+        yield batch
 
 #Step number 3! Throw away all episodes below reward boundary
 def filter_batch(batch, percentile):
