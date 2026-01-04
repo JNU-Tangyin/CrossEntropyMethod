@@ -24,9 +24,7 @@ def noisy_evaluation(env,W,render = False,):
     """
     reward_sum = 0
     state, _ = env.reset()
-    t = 0
-    while True:
-        t += 1
+    for t in range(1, 2001): # 设置最大步数限制，避免死循环
         action = int(np.dot(W,state)>0) # 核心决策逻辑：线性策略 (Linear Policy)
         # 相当于在 4维状态空间中切了一刀（超平面），左边推一把，右边推一把。
         state, reward, terminated, truncated, info = env.step(action)
@@ -34,7 +32,7 @@ def noisy_evaluation(env,W,render = False,):
         reward_sum += reward
         if render and t%5 == 0: 
             env.render()
-        if done or t > 2000: # 
+        if done: 
             break
     return reward_sum
     
